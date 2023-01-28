@@ -17,7 +17,7 @@ class DatasetPath(Enum):
     
     APPLE = os.path.join(Path.ROOT.value, 'static/datasets/preprocessed_apple.csv')
     GMBL = os.path.join(Path.ROOT.value, 'static/datasets/preprocessed_gmbl.csv')
-    MCD = os.path.join(Path.ROOT.value, 'static/datasets/preprocessed_mcd.csv')
+    TSLA = os.path.join(Path.ROOT.value, 'static/datasets/preprocessed_tsla.csv')
 
 
 class ModelPath(Enum):
