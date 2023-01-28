@@ -1,9 +1,13 @@
 from sklearn.preprocessing import MinMaxScaler
 from keras.layers import LSTM as KerasLSTM
+from mlts.utils.data import split_data
+from mlts.config import ModelParams
 from keras.models import Sequential
 from keras.layers import Dense
 from mlts.models import Model
 import numpy as np
+
+from mlts.utils.save import save_model
 
 
 class LSTM(Model):
@@ -17,23 +21,22 @@ class LSTM(Model):
         np.random.seed(42)
     
     def fit(self, df, **kwargs):
+        # Variables
+        scaled_data = df.copy()
+        cols_to_scale = df.columns
+        
         # Scale the data
         scaler = MinMaxScaler()
-        scaled_data = scaler.fit_transform(df[['Close']])
+        scaled_data[cols_to_scale] = scaler.fit_transform(df[cols_to_scale])
         
         # Split the data into training and testing sets
-        train_data = scaled_data[:int(len(scaled_data) * 0.8)]
-        test_data = scaled_data[int(len(scaled_data) * 0.8):]
+        train_data, test_data = split_data(scaled_data)
         
         # Create the training and testing sets
-        x_train = []
-        y_train = []
-        
-        for i in range(60, len(train_data)):
-            x_train.append(train_data[i - 60:i, 0])
-            y_train.append(train_data[i, 0])
-        
-        x_train, y_train = np.array(x_train), np.array(y_train)
+        target_var = ModelParams.TARGET.value
+        input_vars = scaled_data.columns.drop(target_var)
+        x_train = np.array(train_data[input_vars], dtype=np.float32)
+        y_train = np.array(train_data[[target_var]], dtype=np.float32)
         
         # Reshape the data for the LSTM model
         x_train = np.reshape(x_train, (x_train.shape[0], x_train.shape[1], 1))
@@ -45,27 +48,34 @@ class LSTM(Model):
         self._model.add(Dense(1))
         
         # Compile and train the self._model
-        self._model.compile(loss='mean_squared_error', optimizer='adam', metrics=['accuracy'])
+        self._model.compile(
+            loss='mean_squared_error',
+            optimizer='adam',
+            metrics=['accuracy']
+        )
         
-        self._model.fit(x_train, y_train, epochs=1, batch_size=1)
+        # Train the model
+        history = self._model.fit(
+            x_train, y_train,
+            epochs=ModelParams.EPOCHS.value,
+            batch_size=ModelParams.BATCH_SIZE.value,
+            verbose=ModelParams.VERBOSE.value
+        )
+        print(f'Loss values and metrics: \n {history.history}')
+        
+        # Create the testing sets
+        x_test = np.array(test_data[input_vars], dtype=np.float32)
+        y_test = np.array(test_data[[target_var]], dtype=np.float32)
+        
+        # Evaluate Model
+        results = self._model.evaluate(x_test, y_test, batch_size=1)
+        print('Results: ', results)
         
         # Make predictions on the test data
-        x_test = []
-        y_test = []
-        
-        for i in range(60, len(test_data)):
-            x_test.append(test_data[i - 60:i, 0])
-            y_test.append(test_data[i, 0])
-        
-        x_test, y_test = np.array(x_test), np.array(y_test)
-        
-        x_test = np.reshape(x_test, (x_test.shape[0], x_test.shape[1], 1))
         predictions = self._model.predict(x_test)
-        predictions = scaler.inverse_transform(predictions)
         
-        # Evaluate the model
-        rmse = np.sqrt(np.mean((predictions - y_test) ** 2))
-        print('Test RMSE:', rmse)
+        # Save the model
+        save_model(self._model, 'LSTM')
     
     def predict(self, data, **kwargs):
         pass
