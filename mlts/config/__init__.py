@@ -1,1 +1,1 @@
-from mlts.config._config import DatasetPath, ModelPath
+from mlts.config._config import DatasetPath, ModelPath, ModelParams

@@ -16,7 +16,7 @@ def save_model(model, name):
             ModelPath[name].value,
             overwrite=True,
             include_optimizer=True,
-            save_format='tf',
+            save_format='h5',
             save_traces=True,
         )
     elif name == 'ARIMA':

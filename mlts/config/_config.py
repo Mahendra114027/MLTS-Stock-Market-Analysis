@@ -7,7 +7,7 @@ class Path(Enum):
     Path
     """
     
-    ROOT = os.path.abspath('../')
+    ROOT = os.path.abspath('./mlts')
 
 
 class DatasetPath(Enum):
@@ -15,7 +15,7 @@ class DatasetPath(Enum):
     Dataset Paths
     """
     
-    APPLE = os.path.join(Path.ROOT.value, 'static/datasets/preprocessed_apple.csv')
+    APPLE = os.path.join(Path.ROOT.value, 'static/datasets/preprocessed_aapl.csv')
     GMBL = os.path.join(Path.ROOT.value, 'static/datasets/preprocessed_gmbl.csv')
     TSLA = os.path.join(Path.ROOT.value, 'static/datasets/preprocessed_tsla.csv')
 
@@ -25,6 +25,17 @@ class ModelPath(Enum):
     Model Paths
     """
     
-    XGB = os.path.join(Path.ROOT.value, 'static/checkpoints/xgb/xgb.tf')
-    LSTM = os.path.join(Path.ROOT.value, 'static/checkpoints/lstm/lstm.tf')
-    ARIMA = os.path.join(Path.ROOT.value, 'static/checkpoints/arima/arima.tf')
+    XGB = os.path.join(Path.ROOT.value, 'static/checkpoints/xgb/xgb.h5')
+    LSTM = os.path.join(Path.ROOT.value, 'static/checkpoints/lstm/lstm.h5')
+    ARIMA = os.path.join(Path.ROOT.value, 'static/checkpoints/arima/arima.h5')
+
+
+class ModelParams(Enum):
+    """
+    Model Parameters
+    """
+    
+    TARGET = 'adj_close'
+    EPOCHS = 1
+    BATCH_SIZE = 1
+    VERBOSE = 2
