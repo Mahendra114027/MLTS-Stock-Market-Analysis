@@ -11,5 +11,7 @@ class ModelFactory(Factory):
         
         if name == 'lstm':
             return LSTM(*args, **kwargs)
+        elif name == 'xgb':
+            return None
         else:
             raise ValueError('Unknown model name: {}'.format(name))
