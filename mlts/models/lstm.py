@@ -1,13 +1,12 @@
 from sklearn.preprocessing import MinMaxScaler
 from keras.layers import LSTM as KerasLSTM
+from mlts.utils.save import save_model
 from mlts.utils.data import split_data
 from mlts.config import ModelParams
 from keras.models import Sequential
 from keras.layers import Dense
 from mlts.models import Model
 import numpy as np
-
-from mlts.utils.save import save_model
 
 
 class LSTM(Model):

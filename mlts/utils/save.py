@@ -1,6 +1,5 @@
-import os.path
-
 from mlts.config import ModelPath
+import os.path
 
 
 def save_model(model, name):
