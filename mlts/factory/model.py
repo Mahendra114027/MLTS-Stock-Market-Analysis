@@ -1,5 +1,5 @@
+from mlts.models import LSTM, XGB, ARIMA
 from mlts.factory import Factory
-from mlts.models import LSTM
 
 
 class ModelFactory(Factory):
@@ -7,11 +7,13 @@ class ModelFactory(Factory):
     Model Factory
     """
     
-    def create(self, name, *args, **kwargs):
+    def get(self, name, *args, **kwargs):
         
-        if name == 'lstm':
+        if name == 'LSTM':
             return LSTM(*args, **kwargs)
-        elif name == 'xgb':
+        elif name == 'XGB':
             return None
+        elif name == 'ARIMA':
+            return ARIMA(*args, **kwargs)
         else:
             raise ValueError('Unknown model name: {}'.format(name))

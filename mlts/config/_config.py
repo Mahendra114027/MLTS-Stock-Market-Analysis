@@ -15,7 +15,7 @@ class DatasetPath(Enum):
     Dataset Paths
     """
     
-    APPLE = os.path.join(Path.ROOT.value, 'static/datasets/preprocessed_aapl.csv')
+    AAPL = os.path.join(Path.ROOT.value, 'static/datasets/preprocessed_aapl.csv')
     GMBL = os.path.join(Path.ROOT.value, 'static/datasets/preprocessed_gmbl.csv')
     TSLA = os.path.join(Path.ROOT.value, 'static/datasets/preprocessed_tsla.csv')
 
@@ -37,5 +37,5 @@ class ModelParams(Enum):
     
     TARGET = 'adj_close'
     EPOCHS = 1
-    BATCH_SIZE = 1
     VERBOSE = 2
+    BATCH_SIZE = 1

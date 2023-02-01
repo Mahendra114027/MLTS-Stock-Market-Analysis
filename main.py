@@ -1,20 +1,27 @@
-from mlts.models import LSTM
-from mlts.config import *
-import pandas as pd
+from mlts.factory import DatasetFactory, ModelFactory
 import argparse
 
 
-def run(dataset):
-    # Load the historical stock prices for AAPL
-    stock_data = pd.read_csv(DatasetPath[dataset].value, parse_dates=['date'],index_col='date')
+def run(model, dataset):
+    # Object instantiation
+    dataset_factory = DatasetFactory()
+    model_factory = ModelFactory()
     
-    my_model = LSTM()
+    # Load the historical stock prices for AAPL
+    stock_data = dataset_factory.get(dataset)
+    
+    # Get model
+    my_model = model_factory.get(model)
     my_model.fit(stock_data)
 
-if __name__ == '__main__':
 
+if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--dataset') #APPL, GMBL, TSLA
+    parser.add_argument('--model')  # LSTM, XGB, ARIMA
+    parser.add_argument('--dataset')  # APPL, GMBL, TSLA
+    
     args = parser.parse_args()
-    dataset = args.dataset
-    run(dataset)
+    input_model = args.model
+    input_dataset = args.dataset
+    
+    run(input_model, input_dataset)
