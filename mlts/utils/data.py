@@ -59,6 +59,7 @@ def enrich_stock_features(df, num_days=5):
         - Difference between open & low and order day.
         - Creating lag window columns
         - Adding Moving average column for features.
+        - Dropping unnecessary columns
 
     Args:
         df (pd.DataFrame): Input Dataframe
@@ -67,38 +68,42 @@ def enrich_stock_features(df, num_days=5):
     Returns:
         df (pd.DataFrame): Dataframe with enriched features
     """
-    # Returns
-    df['returns'] = df['adj_close'] - df['open']
-    df['returns_prc'] = 100 * (df['returns'] / df['adj_close'])
     
-    # High-Low difference
-    df['high_low_diff'] = df['high'] - df['low']
+    try:
+        # Returns
+        df['returns_prc'] = 100 * ((df['close'] - df['open']) / df['close'])
+        
+        # High-Low difference
+        df['high_low_diff'] = df['high'] - df['low']
+        
+        # Open-CLose Difference
+        df['open_close_diff'] = df['open'] - df['close']
+        
+        # Order Day
+        df['day_num'] = [x for x in list(range(len(df)))]
+        
+        # Features To Create Lag
+        lag_features = ['high_low_diff', 'open_close_diff', 'volume', 'adj_close']
+        
+        # Adding Lag Columns
+        lag_range = [x + 1 for x in range(num_days)]
+        merging_keys = ['day_num']
+        
+        for val in lag_range:
+            temp_df = df[merging_keys + lag_features].copy()
+            temp_df['day_num'] = temp_df['day_num'] + val
+            new_feature_alias = lambda x: 'lag_{}_{}'.format(val, x) if x in lag_features else x
+            temp_df = temp_df.rename(columns=new_feature_alias)
+            df = pd.merge(df, temp_df, on=merging_keys, how='left')
+        
+        # Remove the first N rows since it doesn't contain any NaN values
+        df = df[num_days:]
+        
+        # Adding moving average column for each feature
+        for val in lag_features:
+            df = moving_average(df, val, num_days)
+        
+        return df
     
-    # Open-CLose Difference
-    df['open_close_diff'] = df['open'] - df['close']
-    
-    # Order Day
-    df['day_num'] = [x for x in list(range(len(df)))]
-    
-    # Columns To Create Lag
-    lag_features = ['high_low_diff', 'open_close_diff', 'volume', 'adj_close']
-    
-    # Adding Lag Columns
-    lag_range = [x + 1 for x in range(num_days)]
-    merging_keys = ['day_num']
-    
-    for val in lag_range:
-        temp_df = df[merging_keys + lag_features].copy()
-        temp_df['day_num'] = temp_df['day_num'] + val
-        new_feature_alias = lambda x: 'lag_{}_{}'.format(val, x) if x in lag_features else x
-        temp_df = temp_df.rename(columns=new_feature_alias)
-        df = pd.merge(df, temp_df, on=merging_keys, how='left')
-    
-    # Remove the first N rows since it doesn't contain any value
-    df = df[num_days:]
-    
-    # Adding moving average column for each feature
-    for val in lag_features:
-        df = moving_average(df, val, num_days)
-    
-    return df
+    except Exception as ex:
+        raise Exception(f"Feature Engineering Failed {ex}")

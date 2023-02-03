@@ -1,18 +1,28 @@
-from mlts.config import ModelPath
+from mlts.config import ModelPath, PreprocessedDataset
 import os.path
 
 
-def save_model(model, name):
+def save_model(model, name, **kwargs):
     """
-    Save model
-    """
+    Save the model to disk
     
-    if not os.path.isdir(os.path.dirname(ModelPath[name].value)):
-        os.makedirs(os.path.dirname(ModelPath[name].value))
+    Args:
+        model (object): Model object
+        name (str): Name of the model
+        **kwargs: Keyword arguments
+    """
+    # Model path
+    model_path = ModelPath[name].value
+    
+    if not os.path.isdir(os.path.dirname(model_path)):
+        os.makedirs(os.path.dirname(model_path))
     
     if name in ['LSTM', 'XGB']:
+        if kwargs.get('dataset') is not None:
+            model_path = model_path.replace('.h5', f"_{(kwargs.get('dataset')).lower()}.h5")
+        
         model.save(
-            ModelPath[name].value,
+            model_path,
             overwrite=True,
             include_optimizer=True,
             save_format='h5',
@@ -22,3 +32,26 @@ def save_model(model, name):
         raise NotImplementedError('ARIMA model saving not implemented yet.')
     else:
         raise ValueError('Unknown model name: {}'.format(name))
+
+
+def save_data(df, name, **kwargs):
+    """
+    Save the data to disk
+    
+    Args:
+        df (pd.DataFrame): Dataframe to save
+        name (str): Name of the data
+        **kwargs: Keyword arguments
+    """
+    
+    try:
+        # Dataframe disk path
+        dataframe_path = PreprocessedDataset[name].value
+        
+        if not os.path.isdir(os.path.dirname(dataframe_path)):
+            os.makedirs(os.path.dirname(dataframe_path))
+        
+        df.to_csv(dataframe_path)
+    
+    except Exception as ex:
+        raise Exception(f"Dataframe saving failed: {ex}")

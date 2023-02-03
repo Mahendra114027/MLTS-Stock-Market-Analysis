@@ -13,11 +13,15 @@ def run(model, dataset_name):
     
     # Preprocess dataset
     preprocessor = preprocessor_factory.get('stock')
-    preprocessed_stock_data = preprocessor.preprocess(stock_data)
+    preprocessed_stock_data = preprocessor.preprocess(
+        stock_data,
+        save=True,
+        dataset=dataset_name
+    )
     
     # Get model
-    my_model = model_factory.get(model)
-    # my_model.fit(preprocessed_stock_data)
+    # my_model = model_factory.get(model)
+    # my_model.fit(preprocessed_stock_data, dataset=dataset_name)
 
 
 if __name__ == '__main__':

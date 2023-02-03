@@ -74,7 +74,21 @@ class LSTM(Model):
         predictions = self._model.predict(x_test)
         
         # Save the model
-        save_model(self._model, 'LSTM')
+        dataset = kwargs.get('dataset', None)
+        save_model(self._model, 'LSTM', dataset=dataset)
     
     def predict(self, data, **kwargs):
-        pass
+        """
+        Predict the data
+        
+        Args:
+            data:
+            **kwargs:
+
+        Returns:
+            predictions (np.array): Predictions
+        """
+        if self._model is None:
+            raise Exception('Model not trained')
+        
+        return self._model.predict(data)

@@ -67,4 +67,17 @@ class ARIMA(Model):
         save_model(self._model, 'ARIMA')
     
     def predict(self, data, **kwargs):
-        pass
+        """
+        Predict the data
+
+        Args:
+            data:
+            **kwargs:
+
+        Returns:
+            predictions (np.array): Predictions
+        """
+        if self._model is None:
+            raise Exception('Model not trained')
+        
+        return self._model.predict(data)
