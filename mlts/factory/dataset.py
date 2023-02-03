@@ -1,4 +1,4 @@
-from mlts.config import DatasetPath
+from mlts.config import RawDataset
 from mlts.factory import Factory
 import pandas as pd
 
@@ -10,4 +10,4 @@ class DatasetFactory(Factory):
     
     def get(self, name, *args, **kwargs):
         print('Loading dataset: {}'.format(name))
-        return pd.read_csv(DatasetPath[name].value, parse_dates=['date'], index_col='date')
+        return pd.read_csv(RawDataset[name].value, parse_dates=RawDataset.DATE_FEATURES.value)

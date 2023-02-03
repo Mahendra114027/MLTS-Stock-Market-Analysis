@@ -1,3 +1,4 @@
+from datetime import datetime as dt
 from enum import Enum
 import os
 
@@ -10,7 +11,27 @@ class Path(Enum):
     ROOT = os.path.abspath('./mlts')
 
 
-class DatasetPath(Enum):
+class RawDataset(Enum):
+    """
+    Original Dataset
+    """
+
+    DATE_FEATURES = ['Date']
+    AAPL = os.path.join(Path.ROOT.value, 'static/datasets/original/aapl.csv')
+    GMBL = os.path.join(Path.ROOT.value, 'static/datasets/original/gmbl.csv')
+    TSLA = os.path.join(Path.ROOT.value, 'static/datasets/original/tsla.csv')
+
+
+class Preprocess(Enum):
+    """
+    Preprocessing Config
+    """
+    
+    DROP_COLS = ['close']
+    NUM_DAYS = 3  # After several iterations, 3 days is the best
+
+
+class PreprocessedDataset(Enum):
     """
     Dataset Paths
     """
@@ -24,10 +45,9 @@ class ModelPath(Enum):
     """
     Model Paths
     """
-    
-    XGB = os.path.join(Path.ROOT.value, 'static/checkpoints/xgb/xgb.h5')
-    LSTM = os.path.join(Path.ROOT.value, 'static/checkpoints/lstm/lstm.h5')
-    ARIMA = os.path.join(Path.ROOT.value, 'static/checkpoints/arima/arima.h5')
+    XGB = os.path.join(Path.ROOT.value, f"static/checkpoints/xgb/{dt.now().strftime('%Y%m%d_%H%M_')}xgb.h5")
+    LSTM = os.path.join(Path.ROOT.value, f"static/checkpoints/xgb/{dt.now().strftime('%Y%m%d_%H%M_')}lstm.h5")
+    ARIMA = os.path.join(Path.ROOT.value, f"static/checkpoints/xgb/{dt.now().strftime('%Y%m%d_%H%M_')}arima.h5")
 
 
 class ModelParams(Enum):
