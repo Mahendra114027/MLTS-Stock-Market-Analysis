@@ -1,11 +1,11 @@
+from keras.models import Sequential, load_model
+from mlts.config import ModelParams, ModelPath
 from sklearn.preprocessing import MinMaxScaler
-from keras.layers import LSTM as KerasLSTM
-from mlts.utils.save import save_model
+from kerastuner.tuners import RandomSearch
 from mlts.utils.data import split_data
-from mlts.config import ModelParams
-from keras.models import Sequential
-from keras.layers import Dense
+from mlts.utils.save import save_model
 from mlts.models import Model
+import keras.layers as kl
 import numpy as np
 
 
@@ -17,6 +17,8 @@ class LSTM(Model):
     def __init__(self):
         super().__init__()
         self._model = None
+        self.x_train = None
+        self.y_train = None
         np.random.seed(42)
     
     def fit(self, df, **kwargs):
@@ -35,32 +37,52 @@ class LSTM(Model):
         target_var = ModelParams.TARGET.value
         input_vars = scaled_data.columns.drop(target_var)
         x_train = np.array(train_data[input_vars], dtype=np.float32)
-        y_train = np.array(train_data[[target_var]], dtype=np.float32)
+        self.y_train = np.array(train_data[[target_var]], dtype=np.float32)
         
         # Reshape the data for the LSTM model
-        x_train = np.reshape(x_train, (x_train.shape[0], x_train.shape[1], 1))
+        self.x_train = np.reshape(x_train, (x_train.shape[0], x_train.shape[1], 1))
         
-        # Build the LSTM model
-        self._model = Sequential()
-        self._model.add(KerasLSTM(units=50, return_sequences=True, input_shape=(x_train.shape[1], 1)))
-        self._model.add(KerasLSTM(units=50))
-        self._model.add(Dense(1))
-        
-        # Compile and train the self._model
-        self._model.compile(
-            loss='mean_squared_error',
-            optimizer='adam',
-            metrics=['accuracy']
+        # Define model
+        model = Sequential()
+        model.add(
+            kl.LSTM(
+                units=hp.Int('input_unit', min_value=32, max_value=512, step=32),
+                return_sequences=True,
+                input_shape=(self.x_train.shape[1], 1)
+            )
         )
         
-        # Train the model
-        history = self._model.fit(
-            x_train, y_train,
-            epochs=ModelParams.EPOCHS.value,
-            batch_size=ModelParams.BATCH_SIZE.value,
-            verbose=ModelParams.VERBOSE.value
+        for i in range(hp.Int('n_layers', 1, 4)):
+            model.add(
+                kl.LSTM(
+                    hp.Int(f'lstm_{i}_units', min_value=32, max_value=512, step=32),
+                    return_sequences=True
+                )
+            )
+        
+        model.add(kl.LSTM(hp.Int('layer_2_neurons', min_value=32, max_value=512, step=32)))
+        model.add(kl.Dropout(hp.Float('Dropout_rate', min_value=0, max_value=0.5, step=0.1)))
+        model.add(kl.Dense(self.y_train.shape[1], activation=hp.Choice('dense_activation')))
+        model.compile(loss='mean_squared_error', optimizer='adam')
+        
+        # Model tuning
+        tuner = RandomSearch(
+            model,
+            objective='loss',
+            max_trials=2,
+            executions_per_trial=1
         )
-        print(f'Loss values and metrics: \n {history.history}')
+        
+        tuner.search(
+            x=self.x_train,
+            y=self.y_train,
+            epochs=20,
+            batch_size=32
+        )
+        
+        best_model = tuner.get_best_models(num_models=1)[0]
+        best_model.summary()
+        self._model = best_model
         
         # Create the testing sets
         x_test = np.array(test_data[input_vars], dtype=np.float32)
@@ -74,21 +96,28 @@ class LSTM(Model):
         predictions = self._model.predict(x_test)
         
         # Save the model
-        dataset = kwargs.get('dataset', None)
-        save_model(self._model, 'LSTM', dataset=dataset)
+        save_model(self._model, 'LSTM')
     
     def predict(self, data, **kwargs):
         """
-        Predict the data
+        Predicts the next value in the sequence
         
         Args:
-            data:
-            **kwargs:
+            data (object): Data to predict
+            **kwargs: Keyword arguments
 
         Returns:
-            predictions (np.array): Predictions
+            object: Predicted value
         """
-        if self._model is None:
-            raise Exception('Model not trained')
         
-        return self._model.predict(data)
+        try:
+            if self._model is None:
+                self._model = load_model(ModelPath.LSTM.value)
+            
+            if self._model:
+                predictions = self._model.predict(data)
+                
+                return predictions
+        
+        except Exception as ex:
+            raise Exception('Error predicting data: ', ex)

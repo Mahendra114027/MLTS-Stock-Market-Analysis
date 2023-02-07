@@ -40,7 +40,9 @@ class ARIMA(Model):
             suppress_warnings=True,
             stepwise=True
         )
+        p, d, q = model_autoarima.get_params()['order']
         print(model_autoarima.summary())
+        print('pdq values: ', p, d, q)
         
         # Compile and train the self._model
         train = train_data[ModelParams.TARGET.value].values
@@ -51,7 +53,7 @@ class ARIMA(Model):
         predictions = list()
         
         for i in range(len(test)):
-            model = StatsARIMA(history, order=(3, 1, 0))
+            model = StatsARIMA(history, order=(p, d, q))
             model_fit = model.fit()
             output = model_fit.forecast()
             yhat = output[0]

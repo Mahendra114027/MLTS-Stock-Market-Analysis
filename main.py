@@ -20,8 +20,10 @@ def run(model, dataset_name):
     )
     
     # Get model
-    # my_model = model_factory.get(model)
-    # my_model.fit(preprocessed_stock_data, dataset=dataset_name)
+    my_model = model_factory.get(model)
+    
+    # Train model
+    my_model.fit(preprocessed_stock_data, dataset=dataset_name)
 
 
 if __name__ == '__main__':

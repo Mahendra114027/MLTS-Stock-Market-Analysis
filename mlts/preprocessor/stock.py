@@ -1,4 +1,4 @@
-from mlts.utils.data import split_date, enrich_stock_features
+from mlts.utils.data import split_date, enrich_stock_features, scale_stocks_data
 from mlts.preprocessor import Preprocessor
 from mlts.utils.save import save_data
 from mlts.config import Preprocess
@@ -35,12 +35,19 @@ class StockPreprocessor(Preprocessor):
             # Drop features
             df = df.drop(columns=Preprocess.DROP_FEATURES.value)
             
+            # Scale Data
+            df = scale_stocks_data(df)
+            
             # Fill NaN values with 0
             df = df.fillna(0)
             
             # Set date as index
             df = df.reset_index(drop=True)
             df.set_index('date', inplace=True)
+            
+            # Round float values to 3 decimal places
+            float_cols = df.select_dtypes(include=['float']).columns.tolist()
+            df[float_cols] = df[float_cols].round(3)
             
             # Parse the keyword arguments
             #  save (bool): Save the preprocessed data to disk

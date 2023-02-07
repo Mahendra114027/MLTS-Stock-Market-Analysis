@@ -107,3 +107,49 @@ def enrich_stock_features(df, num_days=5):
     
     except Exception as ex:
         raise Exception(f"Feature Engineering Failed {ex}")
+
+
+def normalize(row, mean, std):
+    """
+    This function is used to normalize the data.
+    
+    Args:
+        row: Dataframe row
+        mean: Mean of the row
+        std: Standard deviation of the row
+
+    Returns:
+        norm_row: Normalized row
+    """
+    
+    std = max(0.001, std)
+    norm_row = (row - mean) / std
+    return norm_row
+
+
+def scale_stocks_data(df):
+    """
+    Function to scale the data using mean and standard deviation of each feature
+    
+    Args:
+        df (pd.DataFrame): Input Dataframe
+
+    Returns:
+        df (pd.DataFrame): Scaled Dataframe
+    """
+    
+    try:
+        features_scaled = ['high_low_diff', 'open_close_diff', 'volume', 'adj_close']
+        
+        for feature in features_scaled:
+            feat_list = [feature, 'lag_1_' + feature, 'lag_2_' + feature, 'lag_3_' + feature]
+            temp = df.apply(
+                lambda row: normalize(row[feat_list], row[feature + '_mean'], row[feature + '_std']),
+                axis=1
+            )
+            df = pd.concat([df, temp], axis=1)
+        
+        return df
+    
+    except Exception as ex:
+        raise Exception(f"Scaling Failed {ex}")
