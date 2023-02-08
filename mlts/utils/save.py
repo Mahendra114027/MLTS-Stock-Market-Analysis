@@ -1,5 +1,6 @@
 from mlts.config import ModelPath, PreprocessedDataset
 import os.path
+import pickle
 
 
 def save_model(model, name, **kwargs):
@@ -29,7 +30,11 @@ def save_model(model, name, **kwargs):
             save_traces=True,
         )
     elif name == 'ARIMA':
-        raise NotImplementedError('ARIMA model saving not implemented yet.')
+        if kwargs.get('dataset') is not None:
+            model_path = model_path.replace('.pkl', f"_{(kwargs.get('dataset')).lower()}.pkl")
+        
+        with open(model_path, 'wb') as pkl:
+            pickle.dump(model, pkl)
     else:
         raise ValueError('Unknown model name: {}'.format(name))
 

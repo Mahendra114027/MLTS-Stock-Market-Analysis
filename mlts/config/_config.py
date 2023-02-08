@@ -47,7 +47,7 @@ class ModelPath(Enum):
     """
     XGB = os.path.join(Path.ROOT.value, f"static/checkpoints/xgb/{dt.now().strftime('%Y%m%d_%H%M_')}xgb.h5")
     LSTM = os.path.join(Path.ROOT.value, f"static/checkpoints/lstm/{dt.now().strftime('%Y%m%d_%H%M_')}lstm.h5")
-    ARIMA = os.path.join(Path.ROOT.value, f"static/checkpoints/arima/{dt.now().strftime('%Y%m%d_%H%M_')}arima.h5")
+    ARIMA = os.path.join(Path.ROOT.value, f"static/checkpoints/arima/{dt.now().strftime('%Y%m%d_%H%M_')}arima.pkl")
 
 
 class ModelParams(Enum):

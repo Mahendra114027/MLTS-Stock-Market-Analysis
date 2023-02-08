@@ -5,6 +5,7 @@ from mlts.utils.save import save_model
 from pmdarima.arima import auto_arima
 from mlts.config import ModelParams
 from mlts.models import Model
+from tqdm import tqdm
 import numpy as np
 
 
@@ -23,7 +24,7 @@ class ARIMA(Model):
         train_data, test_data = split_data(data)
         
         # Build the LSTM model
-        model_autoarima = auto_arima(
+        self._model = auto_arima(
             train_data['adj_close'],
             start_p=0,
             start_q=0,
@@ -40,8 +41,8 @@ class ARIMA(Model):
             suppress_warnings=True,
             stepwise=True
         )
-        p, d, q = model_autoarima.get_params()['order']
-        print(model_autoarima.summary())
+        p, d, q = self._model.get_params()['order']
+        print(self._model.summary())
         print('pdq values: ', p, d, q)
         
         # Compile and train the self._model
@@ -52,7 +53,7 @@ class ARIMA(Model):
         history = [x for x in train]
         predictions = list()
         
-        for i in range(len(test)):
+        for i in tqdm(range(len(test))):
             model = StatsARIMA(history, order=(p, d, q))
             model_fit = model.fit()
             output = model_fit.forecast()
@@ -63,7 +64,7 @@ class ARIMA(Model):
         
         # Evaluate the model
         error = mean_squared_error(test, predictions)
-        print('Testing Mean Squared Error: %.3f' % error)
+        print('Mean Squared Error: %.3f' % error)
         
         # Save the model
         save_model(self._model, 'ARIMA')
