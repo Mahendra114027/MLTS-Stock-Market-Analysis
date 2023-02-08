@@ -1,12 +1,12 @@
 from keras.models import Sequential, load_model
 from mlts.config import ModelParams, ModelPath
 from sklearn.preprocessing import MinMaxScaler
-from kerastuner.tuners import RandomSearch
 from mlts.utils.data import split_data
 from mlts.utils.save import save_model
 from mlts.models import Model
 import keras.layers as kl
 import numpy as np
+import keras_tuner
 
 
 class LSTM(Model):
@@ -16,10 +16,43 @@ class LSTM(Model):
     
     def __init__(self):
         super().__init__()
-        self._model = None
-        self.x_train = None
-        self.y_train = None
+        
+        # Set random seed
         np.random.seed(42)
+        
+        # Model variable for prediction
+        self._model = None
+        
+        # Model variables for training
+        self._x_train_shape = None
+        self._y_train_shape = None
+    
+    def _build_model(self, hp):
+        # Define model
+        model = Sequential()
+        
+        model.add(
+            kl.LSTM(
+                units=hp.Int('input_unit', min_value=32, max_value=512, step=32),
+                return_sequences=True,
+                input_shape=(self._x_train_shape[1], 1)
+            )
+        )
+        
+        for i in range(hp.Int('n_layers', 1, 4)):
+            model.add(
+                kl.LSTM(
+                    hp.Int(f'lstm_{i}_units', min_value=32, max_value=512, step=32),
+                    return_sequences=True
+                )
+            )
+        
+        model.add(kl.LSTM(hp.Int('layer_2_neurons', min_value=32, max_value=512, step=32)))
+        model.add(kl.Dropout(hp.Float('Dropout_rate', min_value=0, max_value=0.5, step=0.1)))
+        model.add(kl.Dense(self._y_train_shape[1], activation=hp.Choice('dense_activation', ['relu', 'sigmoid'])))
+        model.compile(loss='mean_squared_error', optimizer='adam')
+        
+        return model
     
     def fit(self, df, **kwargs):
         # Variables
@@ -37,52 +70,34 @@ class LSTM(Model):
         target_var = ModelParams.TARGET.value
         input_vars = scaled_data.columns.drop(target_var)
         x_train = np.array(train_data[input_vars], dtype=np.float32)
-        self.y_train = np.array(train_data[[target_var]], dtype=np.float32)
+        y_train = np.array(train_data[[target_var]], dtype=np.float32)
         
         # Reshape the data for the LSTM model
-        self.x_train = np.reshape(x_train, (x_train.shape[0], x_train.shape[1], 1))
+        x_train = np.reshape(x_train, (x_train.shape[0], x_train.shape[1], 1))
         
-        # Define model
-        model = Sequential()
-        model.add(
-            kl.LSTM(
-                units=hp.Int('input_unit', min_value=32, max_value=512, step=32),
-                return_sequences=True,
-                input_shape=(self.x_train.shape[1], 1)
-            )
-        )
-        
-        for i in range(hp.Int('n_layers', 1, 4)):
-            model.add(
-                kl.LSTM(
-                    hp.Int(f'lstm_{i}_units', min_value=32, max_value=512, step=32),
-                    return_sequences=True
-                )
-            )
-        
-        model.add(kl.LSTM(hp.Int('layer_2_neurons', min_value=32, max_value=512, step=32)))
-        model.add(kl.Dropout(hp.Float('Dropout_rate', min_value=0, max_value=0.5, step=0.1)))
-        model.add(kl.Dense(self.y_train.shape[1], activation=hp.Choice('dense_activation')))
-        model.compile(loss='mean_squared_error', optimizer='adam')
+        # Assign shapes
+        self._x_train_shape = x_train.shape
+        self._y_train_shape = y_train.shape
         
         # Model tuning
-        tuner = RandomSearch(
-            model,
+        tuner = keras_tuner.tuners.RandomSearch(
+            self._build_model,
             objective='loss',
             max_trials=2,
             executions_per_trial=1
         )
         
         tuner.search(
-            x=self.x_train,
-            y=self.y_train,
-            epochs=20,
-            batch_size=32
+            x=x_train,
+            y=y_train,
+            epochs=ModelParams.EPOCHS.value,
+            batch_size=ModelParams.BATCH_SIZE.value
         )
         
+        # Tuned best model
         best_model = tuner.get_best_models(num_models=1)[0]
-        best_model.summary()
         self._model = best_model
+        print(self._model.summary())
         
         # Create the testing sets
         x_test = np.array(test_data[input_vars], dtype=np.float32)
@@ -96,7 +111,8 @@ class LSTM(Model):
         predictions = self._model.predict(x_test)
         
         # Save the model
-        save_model(self._model, 'LSTM')
+        dataset = kwargs.get('dataset', None)
+        save_model(self._model, 'LSTM', dataset=dataset)
     
     def predict(self, data, **kwargs):
         """
@@ -105,7 +121,7 @@ class LSTM(Model):
         Args:
             data (object): Data to predict
             **kwargs: Keyword arguments
-
+    
         Returns:
             object: Predicted value
         """

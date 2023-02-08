@@ -147,7 +147,7 @@ def scale_stocks_data(df):
                 lambda row: normalize(row[feat_list], row[feature + '_mean'], row[feature + '_std']),
                 axis=1
             )
-            df = pd.concat([df, temp], axis=1)
+            df = pd.concat([df.drop(columns=feat_list), temp], axis=1)
         
         return df
     
