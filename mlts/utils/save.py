@@ -18,7 +18,7 @@ def save_model(model, name, **kwargs):
     if not os.path.isdir(os.path.dirname(model_path)):
         os.makedirs(os.path.dirname(model_path))
     
-    if name in ['LSTM', 'XGB']:
+    if name in ['LSTM']:
         if kwargs.get('dataset') is not None:
             model_path = model_path.replace('.h5', f"_{(kwargs.get('dataset')).lower()}.h5")
         
@@ -29,7 +29,8 @@ def save_model(model, name, **kwargs):
             save_format='h5',
             save_traces=True,
         )
-    elif name == 'ARIMA':
+    
+    elif name in ['ARIMA', 'XGB']:
         if kwargs.get('dataset') is not None:
             model_path = model_path.replace('.pkl', f"_{(kwargs.get('dataset')).lower()}.pkl")
         

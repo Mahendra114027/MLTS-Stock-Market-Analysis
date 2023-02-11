@@ -1,6 +1,7 @@
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import mean_squared_error
 from mlts.utils.data import split_data
+from mlts.utils.save import save_model
 from mlts.config import ModelParams
 from xgboost import XGBRegressor
 from mlts.models import Model
@@ -56,6 +57,10 @@ class XGB(Model):
         # Root Mean Squared Error
         rmse = np.sqrt(mean_squared_error(y_test, self._model.predict(x_test)))
         print('Root mean squared error: ', rmse)
+        
+        # Save the model
+        dataset = kwargs.get('dataset', None)
+        save_model(self._model, 'XGB', dataset=dataset)
     
     def predict(self, data, **kwargs):
         """

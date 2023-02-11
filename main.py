@@ -28,11 +28,11 @@ def run(model, dataset_name):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--model')  # LSTM, XGB, ARIMA
-    parser.add_argument('--dataset')  # AAPL, GMBL, TSLA
+    parser.add_argument('--model')  # LSTM/lstm, XGB/xgb, ARIMA/arima
+    parser.add_argument('--dataset')  # AAPL/aapl, GMBL/gmbl, TSLA/tsla
     
     args = parser.parse_args()
-    input_model = args.model
-    input_dataset = args.dataset
+    input_model = args.model.upper()
+    input_dataset = args.dataset.upper()
     
     run(input_model, input_dataset)
