@@ -12,7 +12,7 @@ class ModelFactory(Factory):
         if name == 'LSTM':
             return LSTM(*args, **kwargs)
         elif name == 'XGB':
-            return None
+            return XGB(*args, **kwargs)
         elif name == 'ARIMA':
             return ARIMA(*args, **kwargs)
         else:

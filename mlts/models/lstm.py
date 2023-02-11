@@ -1,6 +1,5 @@
 from keras.models import Sequential, load_model
 from mlts.config import ModelParams, ModelPath
-from sklearn.preprocessing import MinMaxScaler
 from mlts.utils.data import split_data
 from mlts.utils.save import save_model
 from mlts.models import Model
@@ -55,20 +54,12 @@ class LSTM(Model):
         return model
     
     def fit(self, df, **kwargs):
-        # Variables
-        scaled_data = df.copy()
-        cols_to_scale = df.columns
-        
-        # Scale the data
-        scaler = MinMaxScaler()
-        scaled_data[cols_to_scale] = scaler.fit_transform(df[cols_to_scale])
-        
         # Split the data into training and testing sets
-        train_data, test_data = split_data(scaled_data)
+        train_data, test_data = split_data(df)
         
         # Create the training and testing sets
         target_var = ModelParams.TARGET.value
-        input_vars = scaled_data.columns.drop(target_var)
+        input_vars = df.columns.drop(target_var)
         x_train = np.array(train_data[input_vars], dtype=np.float32)
         y_train = np.array(train_data[[target_var]], dtype=np.float32)
         
@@ -83,7 +74,7 @@ class LSTM(Model):
         tuner = keras_tuner.tuners.RandomSearch(
             self._build_model,
             objective='loss',
-            max_trials=2,
+            max_trials=ModelParams.MAX_TRIALS.value,
             executions_per_trial=1
         )
         

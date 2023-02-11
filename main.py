@@ -15,8 +15,8 @@ def run(model, dataset_name):
     preprocessor = preprocessor_factory.get('stock')
     preprocessed_stock_data = preprocessor.preprocess(
         stock_data,
-        save=True,
-        dataset=dataset_name
+        save=False,  # To save the preprocessed data on File system
+        dataset=dataset_name  # Identifier for the dataset
     )
     
     # Get model
@@ -35,7 +35,4 @@ if __name__ == '__main__':
     input_model = args.model
     input_dataset = args.dataset
     
-    # run(input_model, input_dataset)
-    run('ARIMA', 'AAPL')
-    run('ARIMA', 'GMBL')
-    run('ARIMA', 'TSLA')
+    run(input_model, input_dataset)
