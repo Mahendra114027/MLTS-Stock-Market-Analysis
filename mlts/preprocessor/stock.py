@@ -30,7 +30,7 @@ class StockPreprocessor(Preprocessor):
             df = split_date(df, target_col='date')
             
             """Feature Engineering"""
-            df = enrich_stock_features(df, num_days=5)
+            df = enrich_stock_features(df, num_days=Preprocess.NUM_DAYS.value)
             
             # Drop features
             df = df.drop(columns=Preprocess.DROP_FEATURES.value)

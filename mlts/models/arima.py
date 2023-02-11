@@ -67,7 +67,8 @@ class ARIMA(Model):
         print('Mean Squared Error: %.3f' % error)
         
         # Save the model
-        save_model(self._model, 'ARIMA')
+        dataset = kwargs.get('dataset', None)
+        save_model(self._model, 'ARIMA', dataset=dataset)
     
     def predict(self, data, **kwargs):
         """

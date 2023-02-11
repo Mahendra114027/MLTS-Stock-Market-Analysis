@@ -35,4 +35,7 @@ if __name__ == '__main__':
     input_model = args.model
     input_dataset = args.dataset
     
-    run(input_model, input_dataset)
+    # run(input_model, input_dataset)
+    run('ARIMA', 'AAPL')
+    run('ARIMA', 'GMBL')
+    run('ARIMA', 'TSLA')
