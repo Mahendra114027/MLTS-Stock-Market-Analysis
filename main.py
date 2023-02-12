@@ -35,4 +35,16 @@ if __name__ == '__main__':
     input_model = args.model.upper()
     input_dataset = args.dataset.upper()
     
-    run(input_model, input_dataset)
+    # run(input_model, input_dataset)
+    
+    run('XGB', 'AAPL')
+    run('LSTM', 'AAPL')
+    run('ARIMA', 'AAPL')
+    
+    run('XGB', 'TSLA')
+    run('LSTM', 'TSLA')
+    run('ARIMA', 'TSLA')
+    
+    run('XGB', 'GMBL')
+    run('LSTM', 'GMBL')
+    run('ARIMA', 'GMBL')

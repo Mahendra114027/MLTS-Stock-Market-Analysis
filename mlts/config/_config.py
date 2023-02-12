@@ -56,12 +56,12 @@ class ModelParams(Enum):
     """
     
     TARGET = 'adj_close'
-    EPOCHS = 1
+    EPOCHS = 20
     VERBOSE = 2
-    BATCH_SIZE = 1
+    BATCH_SIZE = 32
     
     # For LSTM
-    MAX_TRIALS = 2
+    MAX_TRIALS = 3
     
     # For XGB
     XGB_PARAMS = {
