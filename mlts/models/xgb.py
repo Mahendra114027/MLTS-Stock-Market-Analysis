@@ -43,8 +43,6 @@ class XGB(Model):
             param_grid=ModelParams.XGB_PARAMS.value,
             scoring='neg_mean_squared_error',
         )
-        
-        print('Training XGBoost model...')
         self._model = grid_search.fit(x_train, y_train)
         
         print('Best parameters: ', self._model.best_params_)

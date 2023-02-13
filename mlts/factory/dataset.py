@@ -9,5 +9,4 @@ class DatasetFactory(Factory):
     """
     
     def get(self, name, *args, **kwargs):
-        print('Loading dataset: {}'.format(name))
         return pd.read_csv(RawDataset[name].value, parse_dates=RawDataset.DATE_FEATURES.value)
