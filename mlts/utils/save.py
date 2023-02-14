@@ -40,6 +40,30 @@ def save_model(model, name, **kwargs):
         raise ValueError('Unknown model name: {}'.format(name))
 
 
+def load_model_files(name, **kwargs):
+    """
+    Save the model to disk
+
+    Args:
+        name (str): Name of the model
+        **kwargs: Keyword arguments
+    """
+    # Model path
+    model_path = ModelPath[name].value
+    
+    if not os.path.exists(model_path):
+        raise FileNotFoundError(f"Model file not found: {model_path}")
+    
+    if name in ['ARIMA', 'XGB']:
+        if kwargs.get('dataset') is not None:
+            model_path = model_path.replace('.pkl', f"_{(kwargs.get('dataset')).lower()}.pkl")
+        
+        with open(model_path, 'rb') as pkl:
+            return pickle.load(pkl)
+    else:
+        raise ValueError('Cannot load unknown model: {}'.format(name))
+
+
 def save_data(df, name, **kwargs):
     """
     Save the data to disk

@@ -65,7 +65,8 @@ class ModelParams(Enum):
     BATCH_SIZE = 32
     
     # For LSTM
-    MAX_TRIALS = 3
+    MAX_TRIALS = 5
+    EXECUTIONS_PER_TRIAL = 3
     
     # For XGB
     XGB_PARAMS = {

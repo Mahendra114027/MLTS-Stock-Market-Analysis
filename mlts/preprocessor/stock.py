@@ -2,7 +2,6 @@ from mlts.utils.data import split_date, enrich_stock_features, scale_stocks_data
 from mlts.preprocessor import Preprocessor
 from mlts.utils.save import save_data
 from mlts.config import Preprocess
-import numpy as np
 
 
 class StockPreprocessor(Preprocessor):
@@ -86,7 +85,7 @@ class StockPreprocessor(Preprocessor):
         """
         
         try:
-            descaled_predictions = predictions * np.sqrt(self._std) + self._mean
+            descaled_predictions = predictions * self._std + self._mean
             return descaled_predictions
         
         except Exception as ex:

@@ -49,7 +49,12 @@ class LSTM(Model):
         
         model.add(kl.LSTM(hp.Int('layer_2_neurons', min_value=32, max_value=512, step=32)))
         model.add(kl.Dropout(hp.Float('Dropout_rate', min_value=0, max_value=0.5, step=0.1)))
-        model.add(kl.Dense(self._y_train_shape[1], activation=hp.Choice('dense_activation', ['relu', 'sigmoid'])))
+        model.add(
+            kl.Dense(
+                self._y_train_shape[1],
+                activation=hp.Choice('dense_activation', ['relu', 'sigmoid'])
+            )
+        )
         model.compile(loss='mean_squared_error', optimizer='adam')
         
         return model
@@ -76,7 +81,7 @@ class LSTM(Model):
             self._build_model,
             objective='loss',
             max_trials=ModelParams.MAX_TRIALS.value,
-            executions_per_trial=1
+            executions_per_trial=ModelParams.EXECUTIONS_PER_TRIAL.value,
         )
         
         tuner.search(
