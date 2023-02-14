@@ -49,7 +49,7 @@ class StockPreprocessor(Preprocessor):
             
             # Set date as index
             df = df.reset_index(drop=True)
-            df.set_index('date', inplace=True)
+            df = df.set_index('date')
             
             # Round float values to 3 decimal places
             float_cols = df.select_dtypes(include=['float']).columns.tolist()
