@@ -1,4 +1,5 @@
 from mlts.factory import DatasetFactory, ModelFactory, PreprocessorFactory
+from time import time
 import argparse
 
 
@@ -8,11 +9,14 @@ def run(model, dataset_name):
     dataset_factory = DatasetFactory()
     model_factory = ModelFactory()
     
+    print(f'-------- {model.upper()} x {dataset_name.upper()} --------')
+    
     # Load the historical stock prices for AAPL
     print('Loading dataset: {}'.format(dataset_name))
     stock_data = dataset_factory.get(dataset_name)
     
     # Preprocess dataset
+    start = time()
     print('--->> Preprocessing input data...')
     preprocessor = preprocessor_factory.get('stock')
     preprocessed_stock_data = preprocessor.preprocess(
@@ -20,14 +24,19 @@ def run(model, dataset_name):
         save=False,  # To save the preprocessed data on File system
         dataset=dataset_name  # Identifier for the dataset
     )
+    end = time()
+    print(f'---->> Completed preprocessing in {round(end - start, 2)} seconds.')
     
     # Get model
     print('Instantiating model: {}'.format(model))
     my_model = model_factory.get(model)
     
     # Train model
+    start = time()
     print('--->> Training model...')
     my_model.fit(preprocessed_stock_data, dataset=dataset_name)
+    end = time()
+    print(f'---->> Completed training in {round(end - start, 2)} seconds.')
 
 
 if __name__ == '__main__':

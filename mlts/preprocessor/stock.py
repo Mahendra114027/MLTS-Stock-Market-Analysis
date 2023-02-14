@@ -42,9 +42,6 @@ class StockPreprocessor(Preprocessor):
             self._std = df['adj_close_std']
             self._mean = df['adj_close_mean']
             
-            # Drop features
-            df = df.drop(columns=Preprocess.DROP_FEATURES.value)
-            
             # Scale Data
             df = scale_stocks_data(df)
             
@@ -58,6 +55,9 @@ class StockPreprocessor(Preprocessor):
             # Round float values to 3 decimal places
             float_cols = df.select_dtypes(include=['float']).columns.tolist()
             df[float_cols] = df[float_cols].round(3)
+            
+            # Drop features
+            df = df.drop(columns=Preprocess.DROP_FEATURES.value, errors='ignore')
             
             # Parse the keyword arguments
             #  save (bool): Save the preprocessed data to disk

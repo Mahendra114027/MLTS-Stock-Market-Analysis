@@ -1,5 +1,5 @@
+from sklearn.metrics import mean_squared_error, mean_absolute_error
 from statsmodels.tsa.arima.model import ARIMA as StatsARIMA
-from sklearn.metrics import mean_squared_error
 from mlts.utils.data import split_data
 from mlts.utils.save import save_model
 from pmdarima.arima import auto_arima
@@ -62,9 +62,13 @@ class ARIMA(Model):
             obs = test[i]
             history.append(obs)
         
-        # Evaluate the model
-        error = mean_squared_error(test, predictions)
-        print('Mean Squared Error: %.3f' % error)
+        # Root Mean Squared Error
+        rmse = np.sqrt(mean_squared_error(test, predictions))
+        print('Root mean squared error: ', rmse)
+        
+        # Mean Absolute Error
+        mae = mean_absolute_error(test, predictions)
+        print('mean absolute error: ', mae)
         
         # Save the model
         dataset = kwargs.get('dataset', None)
