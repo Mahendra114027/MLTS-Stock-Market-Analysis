@@ -96,6 +96,10 @@ class LSTM(Model):
         self._model = best_model
         print(self._model.summary())
         
+        # Best hyperparameters
+        best_hyperparameters = tuner.get_best_hyperparameters(1)[0]
+        print('Best hyperparameters: ', best_hyperparameters.values)
+        
         # Create the testing sets
         x_test = np.array(test_data[input_vars], dtype=np.float32)
         y_test = np.array(test_data[[target_var]], dtype=np.float32)
